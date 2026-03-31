@@ -3,7 +3,7 @@
  * Analisador Paralelo de Logs de Sensores - Abordagem de Estado Compartilhado
  *
  * Compile: gcc -O2 -o sensor_analyzer_par sensor_analyzer_par.c -lpthread -lm
- * Uso    : ./sensor_analyzer_par <num_threads> <arquivo.log>
+ * Uso    : ./sensor_analyzer_par <num_threads>
  */
 
 #include <stdio.h>
