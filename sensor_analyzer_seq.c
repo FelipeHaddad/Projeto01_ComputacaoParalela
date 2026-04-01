@@ -31,7 +31,7 @@ typedef struct {
 // Alocação do array de estatísticas para evitar estouro de pilha
 EstatisticaSensores stats[MAX_SENSORES]; 
 
-// Função responsável por abrir o arquivo e converter texto em estruturas de dados 
+// Função responsável por abrir o arquivo, ler a linha atual e criar a estrutura de dados logs para o sensor
 void leituraArquivo(const char *nome_arquivo, Sensor *logs, int *total_lido) {
     FILE *file = fopen(nome_arquivo, "r");
     if (!file) {
@@ -57,15 +57,15 @@ void leituraArquivo(const char *nome_arquivo, Sensor *logs, int *total_lido) {
         }
     }
 
-    *total_lido = i; // Atualiza a contagem real de registros processados
+    *total_lido = i; // Atualiza a contagem de registros processados
     fclose(file);
 }
 
 int main() {
-    int total_lido = 0;
+    int total_lido = 0;       // Quantidade de registros lidos
     int contadorStatus = 0;   // Contador para ALERTA e CRITICO
     double consumoEnergia = 0; // Acumulador para soma de energia 
-    clock_t start, end;
+    clock_t start, end;       // Contador de Tempo
 
     // Alocação dinâmica no Heap: essencial para grandes volumes de dados
     Sensor *logs = (Sensor *) malloc(MAX_LINHAS * sizeof(Sensor));
