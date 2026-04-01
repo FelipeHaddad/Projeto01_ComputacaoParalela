@@ -140,12 +140,12 @@ int main() {
 
     // Exibição dos resultados finais conforme exigido no roteiro
     printf("\n----------------------------------------------\n");
-    printf("Total de Alertas: %d\n", contadorStatus); [cite: 158]
-    printf("Consumo Total de Energia: %.2f Wh\n", consumoEnergia); [cite: 159]
+    printf("Total de Alertas: %d\n", contadorStatus); 
+    printf("Consumo Total de Energia: %.2f Wh\n", consumoEnergia); 
     if (id_mais_instavel != -1) {
-        printf("Sensor mais instavel: sensor_%03d (Desvio: %.2f)\n", id_mais_instavel, maior_desvio); [cite: 157, 162]
+        printf("Sensor mais instavel: sensor_%03d (Desvio: %.2f)\n", id_mais_instavel, maior_desvio);
     }
-    printf("Tempo de execucao: %.4f segundos\n", tempo_cpu); [cite: 161]
+    printf("Tempo de execucao: %.4f segundos\n", tempo_cpu); 
 
     // Liberação da memória alocada no Heap para evitar vazamentos (Memory Leaks)
     free(logs);
