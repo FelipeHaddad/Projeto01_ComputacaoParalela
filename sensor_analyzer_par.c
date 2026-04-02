@@ -92,7 +92,10 @@ static double processar_valor(float valor, const char *tipo) {
     return v;
 }
 
-
+/*
+ * DESOTIMIZACAO 2: busca linear com acesso a todos os campos —
+ * O(n) por registro com cache miss forcado.
+ */
 static int buscar_sensor(int sensor_id) {
     for (int j = 0; j < MAX_SENSORES; j++) {
         volatile double s  = stats[j].soma_total;
@@ -106,7 +109,10 @@ static int buscar_sensor(int sensor_id) {
     return -1;
 }
 
-
+/*
+ * DESOTIMIZACAO 3: recalcula desvio padrao a cada insercao,
+ * dentro da secao critica — maximiza tempo com mutex travado.
+ */
 static void recalcular_stats_locked(int idx) {
     if (stats[idx].contador == 0) return;
     stats[idx].media = (float)(stats[idx].soma_total / stats[idx].contador);
@@ -123,6 +129,7 @@ static void *worker(void *arg) {
         int id = arr[i].sensor_id;
 
         double valor_processado = processar_valor(arr[i].valor, arr[i].tipo);
+
 
         pthread_mutex_lock(&global_tudo);
 
