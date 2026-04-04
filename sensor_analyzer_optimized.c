@@ -4,6 +4,10 @@ gcc -O2 sensor_analyzer_optimized.c -o sensor_analyzer_optimized -lpthread -lm
 ./sensor_analyzer_optimized 2
 ./sensor_analyzer_optimized 4
 ./sensor_analyzer_optimized 8
+
+Felipe Haddad - 10437372
+Arthur Roldan - 10353847
+Beatriz Nobrega - 10435789
 */
 
 #include <stdio.h>

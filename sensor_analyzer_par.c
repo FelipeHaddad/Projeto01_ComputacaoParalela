@@ -3,6 +3,10 @@ gcc -O0 sensor_analyzer_par.c -o sensor_analyzer_par -lpthread -lm
 ./sensor_analyzer_par 2
 ./sensor_analyzer_par 4
 ./sensor_analyzer_par 8
+
+Felipe Haddad - 10437372
+Arthur Roldan - 10353847
+Beatriz Nobrega - 10435789
 */
 
 #include <stdio.h>
