@@ -13,8 +13,8 @@ Beatriz Nobrega - 10435789
 #include <math.h>
 #include <time.h>
 
-#define MAX_LINHAS 11000000 
-#define MAX_SENSORES 1001
+#define MAX_LINHAS 11000000 //limite maximo de linhas do arquivo 
+#define MAX_SENSORES 1001 //qtd máxima de sensores 
 
 typedef struct {
     int sensor_id;
@@ -24,7 +24,7 @@ typedef struct {
     float valor;
     char status[15];
 } Sensor;
-
+// guarda os cálculos que a gente vai fazer pra cada sensor 
 typedef struct {
     double soma_total;
     double soma_quadrados;
@@ -33,8 +33,8 @@ typedef struct {
     float desvio_padrao;
 } EstatisticaSensores;
 
-EstatisticaSensores stats[MAX_SENSORES]; 
-
+EstatisticaSensores stats[MAX_SENSORES];//array global pra guardar tudo  
+//lê o arquivo e joga os dados no array 
 void leituraArquivo(const char *nome_arquivo, Sensor *logs, int *total_lido) {
     FILE *file = fopen(nome_arquivo, "r");
     if (!file) {
@@ -48,7 +48,7 @@ void leituraArquivo(const char *nome_arquivo, Sensor *logs, int *total_lido) {
     while (fgets(linha, sizeof(linha), file) && i < MAX_LINHAS) {
         if (sscanf(linha, "sensor_%d %s %s %s %f", 
                    &logs[i].sensor_id, logs[i].data, logs[i].hora, logs[i].tipo, &logs[i].valor) == 5) {
-            
+            // pega o status 
             char *ptr_status = strstr(linha, "status ");
             if (ptr_status) {
                 sscanf(ptr_status, "status %s", logs[i].status);
@@ -66,7 +66,7 @@ int main() {
     int contadorStatus = 0;
     double consumoEnergia = 0;
     struct timespec t0, t1;  // <- CLOCK_MONOTONIC
-
+// aloca memória pra guardar todos os logs 
     Sensor *logs = (Sensor *) malloc(MAX_LINHAS * sizeof(Sensor));
     if (logs == NULL) {
         printf("Erro: Memoria insuficiente para alocar o array de logs.\n");
@@ -74,16 +74,16 @@ int main() {
     }
 
     printf("Lendo arquivo... Aguarde.\n");
-    clock_gettime(CLOCK_MONOTONIC, &t0);  // <- inicio
+    clock_gettime(CLOCK_MONOTONIC, &t0);  // <- inicio, começa a contar o tempo 
     
     leituraArquivo("sensores.log", logs, &total_lido);
     
-    memset(stats, 0, sizeof(stats)); 
+    memset(stats, 0, sizeof(stats)); //zera tudo antes de começar os calculos 
 
-    for (int i = 0; i < total_lido; i++) {
+    for (int i = 0; i < total_lido; i++) {// percorre todos os logs 
         int id = logs[i].sensor_id;
 
-        if (strcmp(logs[i].status, "ALERTA") == 0 || strcmp(logs[i].status, "CRITICO") == 0) {
+        if (strcmp(logs[i].status, "ALERTA") == 0 || strcmp(logs[i].status, "CRITICO") == 0) { //conta quantos ALERTA ou CRITICO apareceram
             contadorStatus++;
         }
 
@@ -105,25 +105,25 @@ int main() {
 
     printf("\n--- RELATORIO DE TEMPERATURA (10 PRIMEIROS) ---\n");
     int impressos = 0;
-    for (int j = 0; j < MAX_SENSORES; j++) {
+    for (int j = 0; j < MAX_SENSORES; j++) { //calcula media e desvio padrão
         if (stats[j].contador > 0) {
-            stats[j].media = (float)(stats[j].soma_total / stats[j].contador);
+            stats[j].media = (float)(stats[j].soma_total / stats[j].contador); //média basica 
             
-            double variancia = (stats[j].soma_quadrados / stats[j].contador) - (stats[j].media * stats[j].media);
+            double variancia = (stats[j].soma_quadrados / stats[j].contador) - (stats[j].media * stats[j].media);//desvio padrão 
             stats[j].desvio_padrao = (variancia > 0.0001) ? (float)sqrt(variancia) : 0.0f;
 
-            if (impressos < 10) {
+            if (impressos < 10) { //imprime só os primeiros 10 
                 printf("Sensor %03d | Media: %.2f | Desvio: %.2f\n", j, stats[j].media, stats[j].desvio_padrao);
                 impressos++;
             }
 
-            if (stats[j].desvio_padrao > maior_desvio) {
+            if (stats[j].desvio_padrao > maior_desvio) { // guarda qual sensot é mais instável
                 maior_desvio = stats[j].desvio_padrao;
                 id_mais_instavel = j;
             }
         }
     }
-
+// termina de contar o tempo 
     clock_gettime(CLOCK_MONOTONIC, &t1);  // <- fim
     double tempo = (t1.tv_sec - t0.tv_sec) + (t1.tv_nsec - t0.tv_nsec) / 1e9;  // <- wall time
 
@@ -135,6 +135,6 @@ int main() {
     }
     printf("Tempo de execucao: %.4f segundos\n", tempo);  // <- mesmo formato do paralelo
 
-    free(logs);
+    free(logs); // libera memória 
     return 0;
 }
