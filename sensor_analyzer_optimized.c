@@ -52,7 +52,7 @@ typedef struct {
     int fim;
 } ThreadArgs;
 
-void leituraArquivo(const char *nome_arquivo) {
+void leituraArquivo(const char *nome_arquivo) { //leitura arquivo 
     FILE *file = fopen(nome_arquivo, "r");
     if (!file) { perror("Erro ao abrir arquivo"); exit(1); }
 
@@ -73,17 +73,17 @@ void leituraArquivo(const char *nome_arquivo) {
 }
 
 
-void* thread_func(void* arg) {
+void* thread_func(void* arg) { //função executada por cada thread
     ThreadArgs *ta = (ThreadArgs *)arg;
 
     // DIFERENÇA DO CODIGO PARALELO DESOTIMIZADO
-    // Implementação dos contadores locais
+    // implementação dos contadores locais
     int local_alertas = 0;
     double local_energia = 0.0;
     // Cópia local do estatísticas apenas para a thread atual
     EstatisticaSensores local_stats[MAX_SENSORES] = {0};
 
-    // A thread percorre apenas o seu pedaço (do 'inicio' ao 'fim')
+    //a thread percorre apenas o seu pedaço do inicio ao fim
     for (int i = ta->inicio; i < ta->fim; i++) {
         int   id    = logs[i].sensor_id;
         float valor = logs[i].valor;
@@ -92,7 +92,7 @@ void* thread_func(void* arg) {
         int energia     = (strcmp(logs[i].tipo,   "energia")     == 0);
         int temperatura = (strcmp(logs[i].tipo,   "temperatura") == 0 && id >= 0 && id < MAX_SENSORES);
 
-        if (alerta)
+        if (alerta) //atualiza variáveis locais
             local_alertas++;
 
         if (energia)
@@ -105,10 +105,10 @@ void* thread_func(void* arg) {
         }
 
     }
-    pthread_mutex_lock(&mutex);
+    pthread_mutex_lock(&mutex); //só trava uma vez pra juntar tudo 
     contadorStatus += local_alertas;
     consumoEnergia += local_energia;
-    for(int s=0; s<MAX_SENSORES; s++) {
+    for(int s=0; s<MAX_SENSORES; s++) { //junta os resultados locais com o global 
         if(local_stats[s].contador > 0) {
             stats[s].soma_total += local_stats[s].soma_total;
             stats[s].soma_quadrados += local_stats[s].soma_quadrados;
@@ -128,7 +128,7 @@ int main(int argc, char *argv[]) {
 
     int num_threads  = atoi(argv[1]);
     const char *nome_arquivo = argv[2];
-
+//aloca memória 
     logs = (Sensor *)malloc((size_t)MAX_LINHAS * sizeof(Sensor));
     if (!logs) { fprintf(stderr, "Memoria insuficiente.\n"); return 1; }
 
@@ -142,14 +142,14 @@ int main(int argc, char *argv[]) {
     leituraArquivo(nome_arquivo);
 
     pthread_mutex_init(&mutex, NULL);
-
+//cria threads
     pthread_t  *threads = malloc((size_t)num_threads * sizeof(pthread_t));
     ThreadArgs *args    = malloc((size_t)num_threads * sizeof(ThreadArgs));
-
+//divide o trabalho 
     int bloco  = total_lido / num_threads;
     int inicio = 0;
 
-    for (int t = 0; t < num_threads; t++) {
+    for (int t = 0; t < num_threads; t++) { //espera terminar 
         args[t].inicio = inicio;
         args[t].fim    = (t == num_threads - 1) ? total_lido : inicio + bloco;
         inicio         = args[t].fim;
