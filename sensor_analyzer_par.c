@@ -44,13 +44,13 @@ EstatisticaSensores stats[MAX_SENSORES];
 int contadorStatus = 0;
 double  consumoEnergia = 0.0;
 
-pthread_mutex_t mutex;
-
+pthread_mutex_t mutex; 
+// define o pedaço do trabalho que cada thread vai fazer 
 typedef struct {
     int inicio;
     int fim;
 } ThreadArgs;
-
+// lê o arquivo e preenche o array de logs 
 void leituraArquivo(const char *nome_arquivo) {
     FILE *file = fopen(nome_arquivo, "r");
     if (!file) { perror("Erro ao abrir arquivo"); exit(1); }
@@ -61,7 +61,7 @@ void leituraArquivo(const char *nome_arquivo) {
         if (sscanf(linha, "sensor_%d %10s %8s %19s %f",
                    &logs[i].sensor_id, logs[i].data, logs[i].hora,
                     logs[i].tipo, &logs[i].valor) == 5) {
-            char *ptr = strstr(linha, "status ");
+            char *ptr = strstr(linha, "status "); //pega o status de ALERTA, CRITICO
             if (ptr) sscanf(ptr, "status %14s", logs[i].status);
             else     logs[i].status[0] = '\0';
             i++;
@@ -75,15 +75,15 @@ void leituraArquivo(const char *nome_arquivo) {
 void* thread_func(void* arg) {
     ThreadArgs *ta = (ThreadArgs *)arg;
 
-    for (int i = ta->inicio; i < ta->fim; i++) {
+    for (int i = ta->inicio; i < ta->fim; i++) {//cada thread processa só um pedaço do vetor 
         int   id    = logs[i].sensor_id;
         float valor = logs[i].valor;
-
+//já deixa as condições prontas pra facilitar 
         int alerta      = (strcmp(logs[i].status, "ALERTA")      == 0 || strcmp(logs[i].status, "CRITICO")     == 0);
         int energia     = (strcmp(logs[i].tipo,   "energia")     == 0);
         int temperatura = (strcmp(logs[i].tipo,   "temperatura") == 0 && id >= 0 && id < MAX_SENSORES);
 
-        pthread_mutex_lock(&mutex);
+        pthread_mutex_lock(&mutex);//trava o acesso as variáveis globais, pra evitar conflito entre threads
 
         if (alerta)
             contadorStatus++;
@@ -103,14 +103,14 @@ void* thread_func(void* arg) {
 }
 
 int main(int argc, char *argv[]) {
-    if (argc != 3) {
+    if (argc != 3) { //verifica se passou os argumentos corretos 
         fprintf(stderr, "Uso: %s <num_threads> <arquivo.log>\n", argv[0]);
         return 1;
     }
 
-    int         num_threads  = atoi(argv[1]);
+    int         num_threads  = atoi(argv[1]); //qtdade de threads
     const char *nome_arquivo = argv[2];
-
+//aloca memória pra os logs 
     logs = (Sensor *)malloc((size_t)MAX_LINHAS * sizeof(Sensor));
     if (!logs) { fprintf(stderr, "Memoria insuficiente.\n"); return 1; }
 
@@ -122,22 +122,22 @@ int main(int argc, char *argv[]) {
     clock_gettime(CLOCK_MONOTONIC, &t0);
 
     leituraArquivo(nome_arquivo);
-
+//inicializa o mutex 
     pthread_mutex_init(&mutex, NULL);
 
     pthread_t  *threads = malloc((size_t)num_threads * sizeof(pthread_t));
     ThreadArgs *args    = malloc((size_t)num_threads * sizeof(ThreadArgs));
 
-    int bloco  = total_lido / num_threads;
+    int bloco  = total_lido / num_threads; //divide o trabalho entre as threads 
     int inicio = 0;
 
     for (int t = 0; t < num_threads; t++) {
         args[t].inicio = inicio;
         args[t].fim    = (t == num_threads - 1) ? total_lido : inicio + bloco;
         inicio         = args[t].fim;
-        pthread_create(&threads[t], NULL, thread_func, &args[t]);
+        pthread_create(&threads[t], NULL, thread_func, &args[t]);//cria as threads
     }
-
+// espera todas terminarem 
     for (int t = 0; t < num_threads; t++)
         pthread_join(threads[t], NULL);
 
@@ -163,7 +163,7 @@ int main(int argc, char *argv[]) {
                 impressos++;
             }
 
-            if (stats[j].desvio_padrao > maior_desvio) {
+            if (stats[j].desvio_padrao > maior_desvio) { //identifica o mais instável 
                 maior_desvio     = stats[j].desvio_padrao;
                 id_mais_instavel = j;
             }
