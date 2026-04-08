@@ -16,7 +16,7 @@ Beatriz Nobrega - 10435789
 #include <time.h>
 #include <pthread.h>
 
-#define MAX_LINHAS   11000000
+#define MAX_LINHAS   60480000
 #define MAX_SENSORES 1001
 
 typedef struct {
