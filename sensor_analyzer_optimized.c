@@ -17,7 +17,7 @@ Beatriz Nobrega - 10435789
 #include <time.h>
 #include <pthread.h>
 
-#define MAX_LINHAS   11000000 // Limite de linhas que vão ser carregadas
+#define MAX_LINHAS   60480000 // Limite de linhas que vão ser carregadas
 #define MAX_SENSORES 1001     
 
 typedef struct {
