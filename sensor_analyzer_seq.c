@@ -13,7 +13,7 @@ Beatriz Nobrega - 10435789
 #include <math.h>
 #include <time.h>
 
-#define MAX_LINHAS 11000000 //limite maximo de linhas do arquivo 
+#define MAX_LINHAS 60480000 //limite maximo de linhas do arquivo 
 #define MAX_SENSORES 1001 //qtd máxima de sensores 
 
 typedef struct {
